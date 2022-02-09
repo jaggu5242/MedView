@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="menu_settings">menu_settings</string>
+    <string name="directory">Directory</string>
+    <string name="file">File</string>
+    <string name="drawer_open">Show Devices</string>
+    <string name="drawer_close">Close</string>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <string name="storage_root">USB-Storage</string>
+    <string name="request_write_storage_perm">Please let this app access your storage to copy files from USB</string>
+</resources>
