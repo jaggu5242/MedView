@@ -13,9 +13,9 @@ import com.github.mjdev.libaums.UsbMassStorageDevice
 import com.github.mjdev.libaums.fs.FileSystem
 import com.github.mjdev.libaums.fs.UsbFile
 import java.io.*
-import java.util.*
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.view.WindowManager
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService
 import com.github.mjdev.libaums.server.http.server.AsyncHttpServer
 import android.webkit.WebChromeClient
@@ -72,41 +72,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val dirs: Deque<UsbFile> = ArrayDeque()
     private lateinit var currentFs: FileSystem
-    lateinit var serviceIntent: Intent
+    private lateinit var serviceIntent: Intent
     lateinit var massStorageDevices: Array<UsbMassStorageDevice>
     private var currentDevice = -1
 
     var serverService: UsbFileHttpServerService? = null
-    var rootDirectory: UsbFile? = null;
+    var rootDirectory: UsbFile? = null
 
 
-    @SuppressLint("JavascriptInterface")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         serviceIntent = Intent(this, UsbFileHttpServerService::class.java)
+        window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
         setContentView(R.layout.viewer_layout)
 
+
         myWebView = findViewById<View>(R.id.my_text) as WebView
-        myWebView!!.settings.javaScriptEnabled = true
-        myWebView!!.webChromeClient = WebChromeClient()
-        myWebView!!.settings.domStorageEnabled = true
-        myWebView!!.settings.allowContentAccess = true
-        myWebView!!.settings.domStorageEnabled = true
-        myWebView!!.settings.allowFileAccess = true
-        myWebView!!.settings.allowFileAccessFromFileURLs
-        myWebView!!.settings.builtInZoomControls
-        myWebView!!.settings.supportZoom()
-        myWebView!!.settings.allowUniversalAccessFromFileURLs
-        myWebView!!.addJavascriptInterface(this, "App");
-        if (0 != applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) {
-            WebView.setWebContentsDebuggingEnabled(true)
-        }
-        myWebView!!.settings.javaScriptCanOpenWindowsAutomatically = true
-        myWebView!!.settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-        myWebView!!.settings.loadsImagesAutomatically = true;
+        display()
         val filter = IntentFilter(ACTION_USB_PERMISSION)
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
@@ -117,20 +101,14 @@ class MainActivity : AppCompatActivity() {
 
 
     }
-
     override fun onStart() {
         super.onStart()
-
     }
+
 
     override fun onStop() {
         super.onStop()
         unbindService(serviceConnection)
-    }
-
-    private fun selectDevice(position: Int) {
-        currentDevice = position
-        setupDevice()
     }
 
     /**
@@ -187,9 +165,9 @@ class MainActivity : AppCompatActivity() {
             actionBar!!.title = currentFs.volumeLabel
 //            listView.adapter = UsbFileListAdapter(this, root).apply { adapter = this }
             if (serverService != null) {
-                startHttpServer(root);
+                startHttpServer(root)
             }
-            rootDirectory = root;
+            rootDirectory = root
 
         } catch (e: IOException) {
             Log.e(TAG, "error setting up device", e)
@@ -222,6 +200,28 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+
+    }
+    @SuppressLint("JavascriptInterface", "SetJavaScriptEnabled")
+    private fun display(){
+        myWebView!!.settings.javaScriptEnabled = true
+        myWebView!!.webChromeClient = WebChromeClient()
+        myWebView!!.settings.domStorageEnabled = true
+        myWebView!!.settings.allowContentAccess = true
+        myWebView!!.settings.domStorageEnabled = true
+        myWebView!!.settings.allowFileAccess = true
+        myWebView!!.settings.allowFileAccessFromFileURLs
+        myWebView!!.settings.builtInZoomControls
+        myWebView!!.settings.displayZoomControls
+        myWebView!!.settings.supportZoom()
+        myWebView!!.settings.allowUniversalAccessFromFileURLs
+        myWebView!!.addJavascriptInterface(this, "App")
+        if (0 != applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) {
+            WebView.setWebContentsDebuggingEnabled(true)
+        }
+        myWebView!!.settings.javaScriptCanOpenWindowsAutomatically = true
+        myWebView!!.settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+        myWebView!!.settings.loadsImagesAutomatically = true
     }
 
     private var serviceConnection: ServiceConnection = object : ServiceConnection {
@@ -259,7 +259,7 @@ class MainActivity : AppCompatActivity() {
         this.doubleBackToExitPressedOnce = true
         Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show()
 
-        Handler(Looper.getMainLooper()).postDelayed(Runnable {
+        Handler(Looper.getMainLooper()).postDelayed({
             doubleBackToExitPressedOnce = false
         }, 2000)
     }
