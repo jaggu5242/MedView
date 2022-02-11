@@ -28,7 +28,16 @@
                 android:resource="@xml/device_filter" />
         </activity>
         <activity
-            android:name=".Viewer"/>
+            android:name=".SplashActivity"
+            android:noHistory="true"
+            android:theme="@style/SplashTheme"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

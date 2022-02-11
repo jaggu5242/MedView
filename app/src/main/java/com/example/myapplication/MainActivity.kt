@@ -1,36 +1,29 @@
-package com.example.MyApplication
+package com.example.myapplication
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.*
 import android.hardware.usb.*
-import android.net.Uri
 import android.os.*
 import android.util.Log
 import android.view.View
 import android.widget.*
-import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.github.mjdev.libaums.UsbMassStorageDevice
 import com.github.mjdev.libaums.fs.FileSystem
 import com.github.mjdev.libaums.fs.UsbFile
-import com.github.mjdev.libaums.fs.UsbFileInputStream
 import java.io.*
-import java.lang.StringBuilder
 import java.util.*
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService
 import com.github.mjdev.libaums.server.http.server.AsyncHttpServer
-import fi.iki.elonen.NanoHTTPD.*
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
-import com.example.myapplication.R
 
 
-class MainActivity : AppCompatActivity(){
+class MainActivity : AppCompatActivity() {
     companion object {
 
 
@@ -39,6 +32,8 @@ class MainActivity : AppCompatActivity(){
          */
         private const val ACTION_USB_PERMISSION = "com.github.mjdev.libaums.USB_PERMISSION"
         private val TAG = MainActivity::class.java.simpleName
+
+        @SuppressLint("StaticFieldLeak")
         var myWebView: WebView? = null
     }
 
@@ -58,8 +53,6 @@ class MainActivity : AppCompatActivity(){
                 val device =
                     intent.getParcelableExtra<Parcelable>(UsbManager.EXTRA_DEVICE) as UsbDevice?
                 Log.d(TAG, "USB device attached")
-
-                // determine if connected device is a mass storage device
                 if (device != null) {
                     discoverDevice()
                 }
@@ -73,22 +66,12 @@ class MainActivity : AppCompatActivity(){
                     if (currentDevice != -1) {
                         massStorageDevices[currentDevice].close()
                     }
-                    // check if there are other devices or set action bar title
-                    // to no device if not
                     discoverDevice()
                 }
             }
         }
     }
 
-
-    private lateinit var listView: ListView
-    private lateinit var drawerListView: ListView
-    private lateinit var drawerLayout: DrawerLayout
-    private lateinit var drawerToggle: ActionBarDrawerToggle
-
-    /* package */
-//    private lateinit var adapter: UsbFileListAdapter
     private val dirs: Deque<UsbFile> = ArrayDeque()
     private lateinit var currentFs: FileSystem
     lateinit var serviceIntent: Intent
@@ -105,65 +88,25 @@ class MainActivity : AppCompatActivity(){
 
         serviceIntent = Intent(this, UsbFileHttpServerService::class.java)
         setContentView(R.layout.viewer_layout)
+
         myWebView = findViewById<View>(R.id.my_text) as WebView
-        val txt = intent.getStringExtra("key")
-
-
-        print(txt)
         myWebView!!.settings.javaScriptEnabled = true
-//        myWebView!!.webViewClient = WebViewClient()
         myWebView!!.webChromeClient = WebChromeClient()
-//        myWebView!!.loadData(txt.toString(), "text/javascript", "UTF-8")
         myWebView!!.settings.domStorageEnabled = true
-        myWebView!!.settings.allowContentAccess =true
+        myWebView!!.settings.allowContentAccess = true
         myWebView!!.settings.domStorageEnabled = true
-        myWebView!!.settings.allowFileAccess =true
+        myWebView!!.settings.allowFileAccess = true
         myWebView!!.settings.allowFileAccessFromFileURLs
         myWebView!!.settings.builtInZoomControls
         myWebView!!.settings.supportZoom()
         myWebView!!.settings.allowUniversalAccessFromFileURLs
         myWebView!!.addJavascriptInterface(this, "App");
-//        myWebView!!.loadData(txt.toString(), "text/html", null);
         if (0 != applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) {
             WebView.setWebContentsDebuggingEnabled(true)
         }
         myWebView!!.settings.javaScriptCanOpenWindowsAutomatically = true
         myWebView!!.settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
         myWebView!!.settings.loadsImagesAutomatically = true;
-//        listView = findViewById<View>(R.id.listview) as ListView
-//        drawerListView = findViewById<View>(R.id.left_drawer) as ListView
-//        drawerLayout = findViewById<View>(R.id.drawer_layout) as DrawerLayout
-//        drawerToggle = object : ActionBarDrawerToggle(
-//            this,  /* host Activity */
-//            drawerLayout,  /* DrawerLayout object */
-//            R.string.drawer_open,  /* "open drawer" description */
-//            R.string.drawer_close /* "close drawer" description */
-//        ) {
-//            /** Called when a drawer has settled in a completely closed state.  */
-//            override fun onDrawerClosed(view: View) {
-//                super.onDrawerClosed(view)
-//                supportActionBar!!.title =
-//                    massStorageDevices[currentDevice].partitions[0].volumeLabel
-//            }
-//
-//            /** Called when a drawer has settled in a completely open state.  */
-//            override fun onDrawerOpened(drawerView: View) {
-//                super.onDrawerOpened(drawerView)
-//                supportActionBar!!.title = "Devices"
-//            }
-//        }
-
-        // Set the drawer toggle as the DrawerListener
-//        drawerLayout.addDrawerListener(drawerToggle)
-//        drawerListView.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-//            selectDevice(position)
-//            drawerLayout.closeDrawer(drawerListView)
-//            drawerListView.setItemChecked(position, true)
-//        }
-//        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-//        supportActionBar!!.setHomeButtonEnabled(true)
-//        listView.onItemClickListener = this
-//        registerForContextMenu(listView)
         val filter = IntentFilter(ACTION_USB_PERMISSION)
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
@@ -202,12 +145,8 @@ class MainActivity : AppCompatActivity(){
             Log.w(TAG, "no device found!")
             val actionBar = supportActionBar
             actionBar!!.title = "No device"
-//            listView.adapter = null
             return
         }
-//        drawerListView.adapter =
-//            DrawerListAdapter(this, R.layout.drawer_list_item, massStorageDevices)
-//        drawerListView.setItemChecked(0, true)
         currentDevice = 0
         val usbDevice = intent.getParcelableExtra<Parcelable>(UsbManager.EXTRA_DEVICE) as UsbDevice?
         if (usbDevice != null && usbManager.hasPermission(usbDevice)) {
@@ -257,41 +196,6 @@ class MainActivity : AppCompatActivity(){
         }
     }
 
-//    override fun onItemClick(parent: AdapterView<*>?, view: View, position: Int, rowId: Long) {
-//        val entry = adapter.getItem(position)
-//
-//
-//        if (entry != null) {
-//            if (entry.isDirectory) {
-//                dirs.push(adapter.currentDir)
-////                listView.adapter = UsbFileListAdapter(this, entry).also { adapter = it }
-//                startHttpServer(entry);
-//            } else {
-//                //open the file
-//                var ret: String? = ""
-//
-//                try {
-//                    val inputStream: InputStream = UsbFileInputStream(entry)
-//                    if (inputStream != null) {
-//                        val inputStreamReader = InputStreamReader(inputStream)
-//                        val bufferedReader = BufferedReader(inputStreamReader)
-//                        var receiveString: String? = ""
-//                        val stringBuilder = StringBuilder()
-//                        while (bufferedReader.readLine().also { receiveString = it } != null) {
-//                            stringBuilder.append("\n").append(receiveString)
-//                        }
-//                        inputStream.close()
-//                        ret = stringBuilder.toString()
-//                    }
-//                } catch (e: FileNotFoundException) {
-//                    Log.e("login activity", "File not found: " + e.toString())
-//                } catch (e: IOException) {
-//                    Log.e("login activity", "Can not read file: " + e.toString())
-//                }
-//            }
-//        }
-//    }
-
     private fun startHttpServer(file: UsbFile?) {
         Log.d(TAG, "starting HTTP server")
         if (serverService == null) {
@@ -332,7 +236,10 @@ class MainActivity : AppCompatActivity(){
                 startHttpServer(rootDirectory)
                 myWebView!!.loadUrl("http://localhost:8000/index.html")
             } else {
-                Log.d(TAG, "on service connected start service failed-  $rootDirectory $serverService")
+                Log.d(
+                    TAG,
+                    "on service connected start service failed-  $rootDirectory $serverService"
+                )
             }
         }
 
@@ -342,16 +249,18 @@ class MainActivity : AppCompatActivity(){
             rootDirectory = null
         }
     }
-
+    private var doubleBackToExitPressedOnce = false
     override fun onBackPressed() {
-        try {
-            val dir = dirs.pop()
-//            listView.adapter = UsbFileListAdapter(this, dir).also { adapter = it }
-        } catch (e: NoSuchElementException) {
+        if (doubleBackToExitPressedOnce) {
             super.onBackPressed()
-        } catch (e: IOException) {
-            Log.e(TAG, "error initializing adapter!", e)
+            return
         }
-    }
 
+        this.doubleBackToExitPressedOnce = true
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show()
+
+        Handler(Looper.getMainLooper()).postDelayed(Runnable {
+            doubleBackToExitPressedOnce = false
+        }, 2000)
+    }
 }

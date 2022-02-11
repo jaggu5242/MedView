@@ -9,4 +9,5 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <string name="storage_root">USB-Storage</string>
     <string name="request_write_storage_perm">Please let this app access your storage to copy files from USB</string>
+    <string name="splash">Splash</string>
 </resources>
