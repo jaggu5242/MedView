@@ -234,7 +234,7 @@ class MainActivity : AppCompatActivity() {
             if (rootDirectory != null && (serverService == null || !serverService!!.isServerRunning)) {
                 Log.d(TAG, "on service connected - start server $name")
                 startHttpServer(rootDirectory)
-                myWebView!!.loadUrl("http://localhost:8000/index.html")
+                myWebView!!.loadUrl("http://localhost:8000/viewer/index.html")
             } else {
                 Log.d(
                     TAG,
